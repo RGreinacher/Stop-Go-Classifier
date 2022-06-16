@@ -1,6 +1,6 @@
 <br/>
 <p align="center">
-  <h3 align="center">Stop & Go Classifier</h3>
+  <h1 align="center">The Stop & Go Classifier</h1>
 
   <p align="center">
     Accurately identify significant places (stops) in GPS trajectories!
@@ -17,20 +17,19 @@
 ## Table Of Contents
 
 * [About the project](#about-the-project)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Cite this project](#cite-this-project)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
-* [License](#license)
-* [Author & License](#author-license)
-* [Acknowledgments](#acknowledgments)
+* [Installation](#-installation)
+* [Usage](#%EF%B8%8F-usage)
+* [Cite this project](#-cite-this-project)
+* [Roadmap](#%EF%B8%8F-roadmap)
+* [Contributing](#-contributing)
+* [Author & License](#-author---license)
+* [Acknowledgments](#-acknowledgments)
 
 ## About the project
 
 The Stop & Go Classifier takes a list of raw GPS samples and identifies significant locations (stops). In other words: It transforms a list of position records into intervals of dwelling and transit.
 
-<img src="media/classification_animation.gif" alt="Classification Example" width="300">
+<img src="media/classification_animation.gif" alt="Classification Example">
 
 This is often the first processing step when data-sciencing mobility data. Instead of dealing with raw timestamps and coordinates, you mostly want to see where people went and how long they stayed (significant locations). This is just the right tool for the job.
 
@@ -44,11 +43,12 @@ We provide a complete (open access) paper describing all concepts if you're inte
 
 ## 💾 Installation
 
-At this early stage, the classifier is unavailable via the standard package managers (this will come later!). For now, please clone this repository and import the `StopAndGoClassifier.py` file.
+At this early stage, the classifier is unavailable via the standard package managers (this will come later!). For now, please clone this repository and import the `StopGoClassifier.py` file.
 
 ```python
+import sys
 sys.path.append('path/to/cloned/repo')
-from StopAndGoClassifier import StopAndGoClassifier
+from StopGoClassifier import StopGoClassifier
 ```
 
 ### Dependencies
@@ -60,11 +60,11 @@ from StopAndGoClassifier import StopAndGoClassifier
 
 ## ⌨️ Usage
 
-Use the Stop & Go Classifier from StopAndGoClassifier.py the following way. Create an instance, read your data (timestamps and x&y coordinates), and run the pipeline. Note that the classifier works only on a planar projection of your coordinates, not the plain GPS longitude/latitude. The example folder provides a demo script to convert one into the other.
+Use the Stop & Go Classifier from StopGoClassifier.py the following way. Create an instance, read your data (timestamps and x&y coordinates), and run the pipeline. Note that the classifier works only on a planar projection of your coordinates, not the plain GPS longitude/latitude. The example folder provides a demo script to convert one into the other.
 
-```
+```python
 # create instance
-classifier = StopAndGoClassifier()
+classifier = StopGoClassifier()
 
 # read input
 classifier.read(data.ts, data.x, data.y)
@@ -75,10 +75,10 @@ identified_stops_df = classifier.run()
 
 The `run()` method capsules the following calls:
 
-- `process_samples()` - classifies each sample as trip or stop
-- `aggregate()` - groups subsequent trips and stops together and forms a table of stops with a start and end time property
-- `filter_outliers()` - decides to either remove, merge, or keep each identified stop
-- `isolate_trip_samples()` - similar to the stop intervals, this creates a list of the trip intervals.
+- *process_samples()* - classifies each sample as trip or stop
+- *aggregate()* - groups subsequent trips and stops together and forms a table of stops with a start and end time property
+- *filter_outliers()* - decides to either remove, merge, or keep each identified stop
+- *isolate_trip_samples()* - similar to the stop intervals, this creates a list of the trip intervals.
 
 The system can be tuned using the following settings:
 
@@ -92,12 +92,12 @@ The system can be tuned using the following settings:
 
 However, several other parameters, e.g., to disable certain classification methods., are available. These should be described in detail in a wiki. Call the classifier to apply a new setting using the optional argument `overwrite_settings`.
 
-```
+```python
 settings = {
 	'USE_METHOD_ISA': False,
 	'MIN_STOP_INTERVAL': 79,
 }
-classifier = StopAndGoClassifier(overwrite_settings=settings)
+classifier = StopGoClassifier(overwrite_settings=settings)
 ```
 
 This repo comes with a few examples and some demo data. Check out the *examples* folder and run the scripts.
@@ -108,7 +108,7 @@ This algorithm was introduced at the FOSS4G 2022 conference in Florence, Italy. 
 
 Spang, R. P., Pieper, K., Oesterle, B., Brauer, M., Haeger, C., Mümken, S., Gellert, P., Voigt-Antons, J.-N., 2022. Making Sense of the Noise: Integrating Multiple Analyses for Stop and Trip Classification. Proceedings of FOSS4G, Florence, Italy.
 
-```
+```tex
 @article{spang2022stopgofoss4g,
   title={Making Sense of the Noise: Integrating Multiple Analyses for Stop and Trip Classification},
   author={Spang, Robert P. and Pieper, Kerstin and Oesterle, Benjamin and Brauer, Max and Haeger, Christine and Mümken, Sandra and Gellert, Paul and Voigt-Antons, Jan-Niklas},
