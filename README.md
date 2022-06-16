@@ -141,11 +141,11 @@ Contributions make the open-source community a fantastic place to learn, inspire
 
 ## 🙋🏻 Author & 📝 License
 
-👤 Robert Spang, QULab, TU Berlin
-🐦 @RGreinacher
-✉️ spang➰tu-berlin.de
+👤 Robert Spang, QULab, TU Berlin  
+🐦 @RGreinacher  
+✉️ spang➰tu-berlin.de  
 
-Copyright © 2022 Robert Spang
+Copyright © 2022 Robert Spang  
 This project is [BSD 3-Clause](https://github.com/RGreinacher/Stop-Go-Classifier/blob/main/LICENSE.md) licensed.
 
 ## 🙏🏻 Acknowledgments
