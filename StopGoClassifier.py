@@ -212,7 +212,7 @@ class StopGoClassifier():
         self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'],
         min_periods=self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'],
         center=True
-      ).apply(self.start_end_distance_analysis)
+      ).apply(self.intersecting_segments_analysis)
     else:
       score_results['intersecting_segments_score'] = np.nan
     
@@ -223,7 +223,7 @@ class StopGoClassifier():
       self.settings['METHOD_START_END_DISTANCE_ANALYSIS_WEIGHT'],
       self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WEIGHT'],
     ]
-    score_results['final_score'] = (score_results[['rec_dist_score', 'bearing_score', 'start_end_distance_score', 'intersecting_segments_score']] * weights).mean(axis=1)
+    score_results['final_score'] = (score_results[['rec_dist_score', 'bearing_score', 'start_end_distance_score', 'intersecting_segments_score']] * weights).mean(axis=1) / np.mean(weights) 
 
     # filter score results
     relevant_scores = score_results[score_results.id.isin(unsure_ids.id)]
@@ -254,7 +254,7 @@ class StopGoClassifier():
     # finalize; create final stop decision
     self.samples_df = self.conclude(self.samples_df)
     self.samples_df = self.samples_df.reset_index().set_index('index')
-    self.samples_df = self.samples_df[['ts', 'x', 'y', 'rec_dist_score', 'bearing_score', 'start_end_distance_score', 'intersecting_segments_score', 'overall_score', 'is_stop']].dropna(subset=['overall_score'])
+    self.samples_df = self.samples_df[['ts', 'x', 'y', 'rec_dist_score', 'bearing_score', 'start_end_distance_score', 'intersecting_segments_score', 'overall_score', 'is_stop', 'confidence']].dropna(subset=['overall_score'])
 
 
   def aggregate(self):
@@ -741,6 +741,7 @@ class StopGoClassifier():
     df.overall_score = df.apply(overwrite_rolling_average, axis=1)
 
     df['is_stop'] = df.overall_score > 0
+    df['confidence'] = df.overall_score.abs()
     return df
   
   @staticmethod
