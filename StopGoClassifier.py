@@ -16,14 +16,14 @@ class StopGoClassifier():
     self.trip_df = None
     self.trip_samples_df = None
     self.settings = {
-        'MIN_STOP_INTERVAL': 65, # time in seconds, stops below this threshold will be ignored
-        'RELEVANT_STOP_DURATION': 190, # time in seconds, stops longer than this will always be kept
+        'MIN_STOP_INTERVAL': 63, # time in seconds, stops below this threshold will be ignored
+        'RELEVANT_STOP_DURATION': 178, # time in seconds, stops longer than this will always be kept
         
-        'MIN_DISTANCE_BETWEEN_STOP': 39, # distance in meter; min distance two consecutive stop places must have
-        'RELEVANT_DISTANCE_BETWEEN_STOP': 177, # distance in meter; stop with such a distance will always be kept
-        'MIN_TIME_BETWEEN_STOPS': 81, # time in seconds; remove or merge if less than this threshold
-        'RELEVANT_TIME_BETWEEN_STOPS': 145, # time in seconds; a trip between two stops is relevant if it is longer than this threshold
-        'MAX_TIME_BETWEEN_STOPS_FOR_MERGE': 180, # time in seconds; should not merge stops having more than this time between each other
+        'MIN_DISTANCE_BETWEEN_STOP': 37, # distance in meter; min distance two consecutive stop places must have
+        'RELEVANT_DISTANCE_BETWEEN_STOP': 165, # distance in meter; stop with such a distance will always be kept
+        'MIN_TIME_BETWEEN_STOPS': 69, # time in seconds; remove or merge if less than this threshold
+        'RELEVANT_TIME_BETWEEN_STOPS': 131, # time in seconds; a trip between two stops is relevant if it is longer than this threshold
+        'MAX_TIME_BETWEEN_STOPS_FOR_MERGE': 175, # time in seconds; should not merge stops having more than this time between each other
 
         # METHOD 1: Motion Score
         'USE_MOTION_SCORE': True, # ignores motion score if set to False
@@ -33,40 +33,40 @@ class StopGoClassifier():
 
         # METHOD 2: rectangle_distance_ratio is always > 1 and usually < 4
         'USE_METHOD_RDR': True,
-        'METHOD_RECTANGLE_DISTANCE_WINDOW_SIZE': 20,
-        'METHOD_RECTANGLE_DISTANCE_RATIO_THRESHOLD': 2.0,
+        'METHOD_RECTANGLE_DISTANCE_WINDOW_SIZE': 23,
+        'METHOD_RECTANGLE_DISTANCE_RATIO_THRESHOLD': 1.95,
         'METHOD_RECTANGLE_DISTANCE_RATIO_UPPER_CUTOFF': 2.875,
-        'METHOD_RECTANGLE_DISTANCE_RATIO_WEIGHT': 1.0,
+        'METHOD_RECTANGLE_DISTANCE_RATIO_WEIGHT': 0.84,
 
         # METHOD 3: Bearing analysis
         'USE_METHOD_BA': True,
-        'METHOD_BEARING_ANALYSIS_LOWER_CUTOFF': 28,
-        'METHOD_BEARING_ANALYSIS_THRESHOLD': 43,
+        'METHOD_BEARING_ANALYSIS_LOWER_CUTOFF': 31,
+        'METHOD_BEARING_ANALYSIS_THRESHOLD': 41,
         'METHOD_BEARING_ANALYSIS_UPPER_CUTOFF': 82,
-        'METHOD_BEARING_ANALYSIS_WINDOW_SIZE': 13,
-        'METHOD_BEARING_ANALYSIS_WEIGHT': 2.0,
+        'METHOD_BEARING_ANALYSIS_WINDOW_SIZE': 15,
+        'METHOD_BEARING_ANALYSIS_WEIGHT': 1.55,
 
         # METHOD 4: Analysis of distance between path start and end
         'USE_METHOD_SEDA': True,
-        'METHOD_START_END_DISTANCE_ANALYSIS_LOWER_CUTOFF': 25,
+        'METHOD_START_END_DISTANCE_ANALYSIS_LOWER_CUTOFF': 19,
         'METHOD_START_END_DISTANCE_ANALYSIS_THRESHOLD': 95,
-        'METHOD_START_END_DISTANCE_ANALYSIS_UPPER_CUTOFF': 200,
-        'METHOD_START_END_DISTANCE_ANALYSIS_WINDOW_SIZE': 15,
-        'METHOD_START_END_DISTANCE_ANALYSIS_WEIGHT': 0.525,
+        'METHOD_START_END_DISTANCE_ANALYSIS_UPPER_CUTOFF': 262,
+        'METHOD_START_END_DISTANCE_ANALYSIS_WINDOW_SIZE': 14,
+        'METHOD_START_END_DISTANCE_ANALYSIS_WEIGHT': 1.69,
 
         # METHOD 5: Analysis of intersections of path segments
         'USE_METHOD_ISA': True,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_UPPER_CUTOFF': 3,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_THRESHOLD': 0.5,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE': 15,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WEIGHT': 0.975,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_UPPER_CUTOFF': 2,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_THRESHOLD': 0.8,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE': 19,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WEIGHT': 0.5,
 
         # METHOD 6: Analysis of data gaps
         'USE_METHOD_MDA': True,
-        'MIN_MISSING_DATA_INTERVAL': 55, # time in seconds; if there are no records for at least this persiod of time between two consecutive samples, overwite scores using the missing data analysis strategy
+        'MIN_MISSING_DATA_INTERVAL': 53, # time in seconds; if there are no records for at least this persiod of time between two consecutive samples, overwite scores using the missing data analysis strategy
         'METHOD_MISSING_DATA_ANALYSIS_LOWER_CUTOFF': 0.39, # max tolerated drift speed to have assured stop
-        'METHOD_MISSING_DATA_ANALYSIS_THRESHOLD': 1.483,
-        'METHOD_MISSING_DATA_ANALYSIS_UPPER_CUTOFF': 22, # min speed to have assured trip
+        'METHOD_MISSING_DATA_ANALYSIS_THRESHOLD': 1.4,
+        'METHOD_MISSING_DATA_ANALYSIS_UPPER_CUTOFF': 26, # min speed to have assured trip
       }
 
     if overwrite_settings is not None:
