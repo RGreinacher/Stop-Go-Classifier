@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from scipy import spatial
 from itertools import combinations
 import numpy as np
@@ -553,6 +555,7 @@ class StopGoClassifier():
     ])
 
     pairs = filter(lambda e: e[0] + 1 != e[1], combinations(range(0, self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE']-1), 2))
+    list(pairs) # this somehow causes a ~10x speedup... research why?!
 
     intersections = 0
     for pair in pairs:

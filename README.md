@@ -63,7 +63,7 @@ As the performance values in the [paper](#-cite-this-project) may become outdate
 |Trip count           |1027               |1407           |708                               |667                          |
 |Missed trips         |32                 |19             |28                                |33                           |
 |-         	  		  |-         			  |-               |-                                  |-                             |
-|Runtime              |2.6s               |53.17s         |78.96s                            |50.97s                       |
+|Runtime              |2.6s               |53.17s         |35.81s                            |24.34s                       |
 
 
 As the *Stop & Go Classifier* consists of several different analysis methods, we tested the performance of each method independently. We also present the performance change when all algorithms’ results are combined and showcase the influence of the Motion Score and the missing data analysis.
