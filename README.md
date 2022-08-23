@@ -63,7 +63,7 @@ As the performance values in the [paper](#-cite-this-project) may become outdate
 |Trip count           |1027               |1407           |708                               |667                          |
 |Missed trips         |32                 |19             |28                                |33                           |
 |-         	  		  |-         			  |-               |-                                  |-                             |
-|Runtime              |2.6s               |53.17s         |35.81s                            |24.34s                       |
+|Runtime              |2.6s               |53.17s         |49.31s                            |33.12s                       |
 
 
 As the *Stop & Go Classifier* consists of several different analysis methods, we tested the performance of each method independently. We also present the performance change when all algorithms’ results are combined and showcase the influence of the Motion Score and the missing data analysis.
@@ -73,11 +73,11 @@ As the *Stop & Go Classifier* consists of several different analysis methods, we
 |Width distance ratio        | .941              | .948         |
 |Bearing analysis            | .93               | .945         |
 |Start-end-distance          | .948              | .955         |
-|Path segment intersections  | .903              | .926         |
+|Path segment intersections  | .907              | .927         |
 |-         	  		         |-	               |-              |
 |All 4                       | .962              | .968         |
 |All 4 + motion score        | .963              | .971         |
-|All 4 + missing data        | .966              | .974         |
+|All 4 + missing data        | .966              | .973         |
 |All 4 + missing + motion    | .965              | .975         |
 
 ## 💾 Installation

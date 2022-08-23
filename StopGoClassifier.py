@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from scipy import spatial
-from itertools import combinations
 import numpy as np
 import pandas as pd
 
@@ -38,7 +37,7 @@ class StopGoClassifier():
         'METHOD_RECTANGLE_DISTANCE_WINDOW_SIZE': 23,
         'METHOD_RECTANGLE_DISTANCE_RATIO_THRESHOLD': 1.95,
         'METHOD_RECTANGLE_DISTANCE_RATIO_UPPER_CUTOFF': 2.875,
-        'METHOD_RECTANGLE_DISTANCE_RATIO_WEIGHT': 0.84,
+        'METHOD_RECTANGLE_DISTANCE_RATIO_WEIGHT': 0.735,
 
         # METHOD 3: Bearing analysis
         'USE_METHOD_BA': True,
@@ -46,7 +45,7 @@ class StopGoClassifier():
         'METHOD_BEARING_ANALYSIS_THRESHOLD': 41,
         'METHOD_BEARING_ANALYSIS_UPPER_CUTOFF': 82,
         'METHOD_BEARING_ANALYSIS_WINDOW_SIZE': 15,
-        'METHOD_BEARING_ANALYSIS_WEIGHT': 1.55,
+        'METHOD_BEARING_ANALYSIS_WEIGHT': 1.2,
 
         # METHOD 4: Analysis of distance between path start and end
         'USE_METHOD_SEDA': True,
@@ -54,14 +53,14 @@ class StopGoClassifier():
         'METHOD_START_END_DISTANCE_ANALYSIS_THRESHOLD': 95,
         'METHOD_START_END_DISTANCE_ANALYSIS_UPPER_CUTOFF': 262,
         'METHOD_START_END_DISTANCE_ANALYSIS_WINDOW_SIZE': 14,
-        'METHOD_START_END_DISTANCE_ANALYSIS_WEIGHT': 1.69,
+        'METHOD_START_END_DISTANCE_ANALYSIS_WEIGHT': 1.125,
 
         # METHOD 5: Analysis of intersections of path segments
         'USE_METHOD_ISA': True,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_UPPER_CUTOFF': 2,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_THRESHOLD': 0.8,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_UPPER_CUTOFF': 4,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_THRESHOLD': 0.75,
         'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE': 19,
-        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WEIGHT': 0.5,
+        'METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WEIGHT': 0.43,
 
         # METHOD 6: Analysis of data gaps
         'USE_METHOD_MDA': True,
@@ -210,11 +209,9 @@ class StopGoClassifier():
 
     # Method no. 5 - intersecting segments analysis
     if self.settings['USE_METHOD_ISA']:
-      score_results['intersecting_segments_score'] = run_scores.x.rolling(
-        self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'],
-        min_periods=self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'],
-        center=True
-      ).apply(self.intersecting_segments_analysis)
+      score_results = score_results.reset_index()
+      run_scores = run_scores.reset_index()
+      score_results['intersecting_segments_score'] = self.intersecting_segments_analysis(run_scores)
     else:
       score_results['intersecting_segments_score'] = np.nan
     
@@ -544,39 +541,47 @@ class StopGoClassifier():
     )
     return score * -1
 
-  def intersecting_segments_analysis(self, window):
-    xs = np.array(list(map(lambda x: x[0], window.index.values)))
-    ys = np.array(list(map(lambda x: x[1], window.index.values)))
+  def intersecting_segments_analysis(self, samples_df):
+    # create sparse comparison matrix
     segments = np.array([
-      xs[:-1],
-      ys[:-1],
-      xs[1:],
-      ys[1:],
+      samples_df.x.values[:-1],
+      samples_df.y.values[:-1],
+      samples_df.x.values[1:],
+      samples_df.y.values[1:],
     ])
 
-    pairs = filter(lambda e: e[0] + 1 != e[1], combinations(range(0, self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE']-1), 2))
-    list(pairs) # this somehow causes a ~10x speedup... research why?!
+    row_count = len(samples_df) - 1
+    intersection_matrix = np.zeros((row_count, row_count))
+    for row_idx in range(row_count):
+      for col_idx in range(row_idx + 2, min(row_idx + self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'], row_count)):
+        ax = segments[0, row_idx]
+        ay = segments[1, row_idx]
+        bx = segments[2, row_idx]
+        by = segments[3, row_idx]
+        cx = segments[0, col_idx]
+        cy = segments[1, col_idx]
+        dx = segments[2, col_idx]
+        dy = segments[3, col_idx]
+        intersection_matrix[row_idx, col_idx] = StopGoClassifier.intersect(ax, ay, bx, by, cx, cy, dx, dy)
 
-    intersections = 0
-    for pair in pairs:
-      ax = segments[0, pair[0]]
-      ay = segments[1, pair[0]]
-      bx = segments[2, pair[0]]
-      by = segments[3, pair[0]]
-      cx = segments[0, pair[1]]
-      cy = segments[1, pair[1]]
-      dx = segments[2, pair[1]]
-      dy = segments[3, pair[1]]
-      if StopGoClassifier.intersect(ax, ay, bx, by, cx, cy, dx, dy):
-        intersections += 1
+    # count & score windowed intersections
+    def count_intersections(window):
+      a, b = window.index[0], window.index[-1]
+      intersections = intersection_matrix[a:b, a:b].sum()
+      return StopGoClassifier.compute_score(
+        intersections,
+        0,
+        self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_UPPER_CUTOFF'],
+        self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_THRESHOLD']
+      )
 
-    score = StopGoClassifier.compute_score(
-      intersections,
-      0,
-      self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_UPPER_CUTOFF'],
-      self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_THRESHOLD']
-    )
-    return score
+    # iterate the dataframe in a rolling manner
+    scores = samples_df.x.rolling(
+      self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'],
+      min_periods=self.settings['METHOD_INTERSECTING_SEGMENTS_ANALYSIS_WINDOW_SIZE'],
+      center=True
+    ).apply(count_intersections)
+    return scores
 
   def missing_data_analysis(self, row):
     speed = row.speed * 3.6 # km/h
