@@ -487,12 +487,20 @@ class StopGoClassifier():
 
     # identify furthest points
     points = np.array(list(window.index.values))  
-    convexhull = spatial.ConvexHull(points)
-    convhull_vertices = points[convexhull.vertices]
-    dist_mat = spatial.distance_matrix(convhull_vertices, convhull_vertices)
-    idx_p1, idx_p2 = np.unravel_index(dist_mat.argmax(), dist_mat.shape)
-    x1, y1 = convhull_vertices[idx_p1]
-    x2, y2 = convhull_vertices[idx_p2]
+
+    try:
+      convexhull = spatial.ConvexHull(points)
+      convhull_vertices = points[convexhull.vertices]
+      dist_mat = spatial.distance_matrix(convhull_vertices, convhull_vertices)
+      idx_p1, idx_p2 = np.unravel_index(dist_mat.argmax(), dist_mat.shape)
+      x1, y1 = convhull_vertices[idx_p1]
+      x2, y2 = convhull_vertices[idx_p2]
+
+    except spatial.QhullError:
+      # assume a collapsing QHull; infer max distance from first & last point in list
+      x1, y1 = points[0]
+      x2, y2 = points[-1]
+    
     max_distance_between_points = np.sqrt(np.square(x1 - x2) + np.square(y1 - y2))
 
     # path distance
@@ -632,6 +640,10 @@ class StopGoClassifier():
   @staticmethod
   def bearing_deviation(ax, ay, bx, by, cx, cy):
     # https://manivannan-ai.medium.com/find-the-angle-between-three-points-from-2d-using-python-348c513e2cd
+
+    if np.isnan(ax) or np.isnan(cx):
+      return np.nan
+
     a = np.array([ax, ay])
     b = np.array([bx, by])
     c = np.array([cx, cy])
@@ -640,6 +652,11 @@ class StopGoClassifier():
     bc = c - b
 
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+    if cosine_angle < -1:
+      cosine_angle = -1
+    elif cosine_angle > 1:
+      cosine_angle = 1
+
     difference_deg = np.rad2deg(np.arccos(cosine_angle) - np.pi)
     return np.abs(difference_deg)
 
