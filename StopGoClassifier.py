@@ -154,7 +154,7 @@ class StopGoClassifier():
       self.samples_df.loc[idx_without_ms, 'motion_score'] = 0.0
       
       # samples with motion score are mapped to the [-1, 1] interval; -1 = trip, 1 = stop
-      idx_with_ms = self.samples_df[~self.samples_df.motion_score.isna()].index
+      idx_with_ms = self.samples_df[~self.samples_df.index.isin(idx_without_ms)].index
       self.samples_df.loc[idx_with_ms, 'motion_score'] = self.samples_df.loc[idx_with_ms].apply(self.compute_motion_score, axis=1)
       
       # flag those records that can be savely assumed as stop
