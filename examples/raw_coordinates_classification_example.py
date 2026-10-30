@@ -24,8 +24,8 @@ gdf = gdf.set_crs('EPSG:4326') # interpret raw GPS records as WGS84 / EPSG 4326
 gdf = gdf.to_crs('EPSG:3035') # project sample into the ETRS89-extended / LAEA Europe space
 
 # extract x / y values from geopandas geometry object
-gdf['y'] = list(map(lambda x: x.x, gdf.geometry.values))
-gdf['x'] = list(map(lambda x: x.y, gdf.geometry.values))
+gdf['y'] = list(gdf.geometry.y.values)
+gdf['x'] = list(gdf.geometry.x.values)
 
 # create a new dataframe containing only relevant information
 gps_data = gdf[['ts', 'x', 'y', 'longitude', 'latitude']].copy()
